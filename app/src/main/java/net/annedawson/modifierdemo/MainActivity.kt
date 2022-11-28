@@ -1,14 +1,16 @@
 package net.annedawson.modifierdemo
 
 /*
-Date: Saturday 26th November 2022, 14:28 PT
+Date: Monday 28th November 2022, 4:28 PT
 Programmer: Anne Dawson
 Email: anne.dawson@gmail.com
 App: ModifierDemo
 File: MainActivity.kt
 Purpose: To demonstrate the use of modifiers
 From: https://www.answertopia.com/jetpack-compose/how-to-use-modifiers-in-jetpack-compose/
-Status: NOT Completed
+Ref: named arguments, default values
+     https://kotlinlang.org/docs/functions.html#named-arguments
+Status: Completed
  */
 
 import android.os.Bundle
@@ -32,6 +34,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 
 
 // This code has been developed from the instructions here:
@@ -70,6 +74,10 @@ fun DemoScreen() {
     // try changing the order of the two lines above to see the effect
     // when the app runs. Order matters.
 
+    val secondModifier = Modifier.height(120.dp)  // this modifier will be combined
+                                                  // with the other modifier
+                                                  // named modifier
+
     // Once a modifier has been created
     // it can be passed to any composable which accepts a modifier parameter.
 
@@ -84,6 +92,7 @@ fun DemoScreen() {
     )
 
 
+     Most built-in composables accept a modifier parameter.
      If a built-in composable accepts a modifier
      it will always be the first optional parameter in the parameter list.
 
@@ -93,34 +102,81 @@ fun DemoScreen() {
      Here we are sending a modifier to a built-in composable:
 
      */
+    Column(
+        Modifier.padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            "Modifier Demo App",
+            // modifier = modifier,   // or just "modifier," since modifier is an optional default modifier
+            modifier.then(secondModifier),  // applying a combination of both modifiers
+            // it essentially means, apply the first modifier, then the second modifier
+            fontSize = 40.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(16.dp))
 
-    Text(
-        "Hello Compose",
-        modifier = modifier,
-        fontSize = 40.sp,
-        fontWeight = FontWeight.Bold
-    )
+        // In this call, CustomImage(R.drawable.gin2)
+        // the Image component is using the default Modifier instance
+        // that we declared in the CustomImage function signature.
+
+        // CustomImage(R.drawable.gin2)
+        CustomImage(R.drawable.gin2,
+            Modifier
+                .padding(16.dp)
+                .width(270.dp)
+                .clip(shape = RoundedCornerShape(30.dp))
+            // the above is a custom modifier
+            // to be used instead of the default one
+        )
+    }
+
 }
-
-// Here we are sending a modifier to a custom composable (not built-in).
+// Below we are sending a modifier to a custom composable (not built-in).
 // The modifier parameter *** has *** to have a default value (= Modifier)
 // so that when this composable is called, you don't need to
 // specify a modifier argument in the call, the default will be used.
-// In fact, when this CustomImage composable is called from
+// see the call: CustomImage(R.drawable.Gin2)      - note no modifier argument needed
+// This has the added benefit of allowing the modifier to be passed
+// without declaring the argument name. The following, therefore, is syntactically correct:
 
-@Composable
-fun CustomImage(image: Int, modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(image),
-        contentDescription = null,
-        modifier
-    )
-}
+/*
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    ModifierDemoTheme {
-        DemoScreen()
+Text(
+"Hello Compose",
+modifier,             <----  look, you don't need to write modifier = modifier
+fontSize = 40.sp,
+fontWeight = FontWeight.Bold
+)
+
+ */
+
+// see the call: CustomImage(R.drawable.Gin2)      - note no modifier argument needed
+
+
+// It is important to remember that the modifier parameter must be optional
+// so that the function can be called without one.
+// This means that we need to specify an empty Modifier instance
+// as the default for the parameter:
+    @Composable
+    fun CustomImage(image: Int, modifier: Modifier = Modifier) {
+        Image(
+            painter = painterResource(image),
+            contentDescription = null,
+            modifier  // a shorthand form of modifier = modifier
+            // you can do this with optional default parameters
+        )
     }
-}
+
+    @Preview(showBackground = true)
+    @Composable
+    fun DefaultPreview() {
+        ModifierDemoTheme {
+            DemoScreen()
+        }
+    }
+
+
+// named arguments, default values
+// https://kotlinlang.org/docs/functions.html#named-arguments
